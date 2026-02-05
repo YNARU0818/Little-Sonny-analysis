@@ -47,7 +47,3 @@
 - **최종 산출물**: 
     - `fw_prospect_top10.csv`: 모델이 선정한 차세대 공격수 TOP 10 리스트
     - `prospect_analysis_full.csv`: 전체 선수의 유망주 확률 분석 결과
-
-## 📁 파일 구조
-- `Little-Sonny_LAMA_Analysis.py`: **(Main)** LightAutoML 학습 및 최종 유망주 예측 스크립트
-- `Little-Sonny_EDA_Main.ipynb`: 상세 데이터 탐색 및 파생 변수 검증 기록

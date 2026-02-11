@@ -1,49 +1,47 @@
-# ⚽ Project: Little-Sonny (LAMA 기반 차세대 유망주 예측)
+# 🚗 Used Car Price Prediction (Kaggle)
 
-본 프로젝트는 FIFA 축구 선수 데이터를 분석하여, 특정 선수가 향후 대성할 가능성이 있는 **'유망주(Prospect)'**인지 여부를 예측하는 머신러닝 모델 개발 프로젝트입니다. 특히 **LightAutoML(LAMA)** 프레임워크를 활용하여 공격수 포지션에 특화된 유망주 발굴을 목표로 합니다.
+본 프로젝트는 캐글의 **Regression of Used Car Prices** 경진대회를 위해 진행되었으며, 중고차 시장의 다양한 지표를 분석하여 최적의 판매 가격을 예측하는 것을 목표로 합니다.
 
-## 🚀 프로젝트 개요
-- **목적**: 선수들의 신체 조건, 기술 스탯, 심리적 요인 등을 종합하여 유망주(1)와 일반 선수(0)를 분류
-- **데이터셋**: FIFA 선수 정보 기반 (나이, 포지션, 6대 핵심 스탯 및 세부 기술 스탯 등)
-- **평가 지표**: ROC-AUC Score (유망주 분류의 변별력 측정)
+---
 
-## 🧠 주요 분석 관점 및 피처 엔지니어링
-단순한 전체 능력치(`STRating`)뿐만 아니라, 데이터 분석 과정에서 도출한 핵심 가설을 바탕으로 다음과 같은 **고급 파생 변수**를 생성했습니다.
+## 📊 1. 핵심 EDA 및 인사이트 (Finding the Money)
+단순한 데이터 분포 확인을 넘어, 수익성과 직결되는 **'돈이 되는 지표'**를 발굴하는 데 집중했습니다.
 
-1. **공격 지능 (Offensive IQ)**: 
-   - 위치 선정(`Positioning`), 시야(`Vision`), 반응 속도(`Reactions`)의 평균을 통해 단순 기술을 넘어선 '축구 지능' 수치화
-2. **기술적 잠재력 (On the Ball)**:
-   - 드리블, 볼 컨트롤, 민첩성, 밸런스를 조합하여 개인 전술 능력 반영
-3. **심리적 성숙도 (Clutch Score)**:
-   - 압박 상황에서의 침착함(`Composure`)과 페널티 킥, 볼레이 슛 스탯을 융합하여 결정적인 순간의 득점력 고려
-4. **종합 잠재력 지수 (Prospect_Index)**:
-   - 생성된 지표들의 총합을 나이(`Age + 1`)로 나누어, **나이가 어릴수록 기량이 뛰어난 '떡잎' 선수**에게 높은 가중치 부여
+* **감가상각 절벽(Depreciation Cliff):** 특정 연식(보증 종료 시점 등)에서 가격이 급격히 하락하는 구간을 포착.
+* **사고 방어력(Resilience Analysis):** 브랜드별로 사고 이력이 중고차 가격에 미치는 영향도가 다름을 확인 (럭셔리 브랜드의 높은 가격 방어력).
+* **주행 밀도(Mileage Intensity):** 단순 주행거리가 아닌, 연식 대비 주행거리를 분석하여 '저평가된 매물'의 특징을 정의.
 
-## 🛠️ 모델링 전략 (Modeling Strategy)
+---
 
-본 프로젝트는 예측 성능과 효율성을 극대화하기 위해 자동화 프레임워크인 **LightAutoML(LAMA)**을 채택했습니다.
+## 🛠 2. 주요 피처 엔지니어링 (Feature Engineering)
+모델의 성능을 극대화하기 위해 원본 데이터를 가공하여 고부가가치 변수를 생성했습니다.
 
-### 1. LightAutoML (LAMA) 기반 스태킹 앙상블
-- **전략**: LightGBM과 CatBoost 모델을 결합한 스태킹(Stacking) 구조 활용
-- **특징**: 범주형 변수(Position)와 수치형 변수 간의 복잡한 관계를 자동으로 학습하여 최적의 예측 성능 도출
+1. **Mileage Intensity**: `milage / (2024 - model_year)` — 차량의 혹사 정도 수치화.
+2. **Engine Specs Parsing**: 원본 텍스트 데이터(`engine`)에서 **Horsepower(HP)**, **Displacement(L)**, **Cylinders** 등 핵심 수치 추출.
+3. **Log Transformation**: 가격 데이터의 심한 편향(Skewness)을 해결하기 위해 타겟 변수에 `log1p` 변환 적용.
 
-### 2. 하이퍼파라미터 및 검증 최적화
-- `timeout=600`(10분) 설정을 통해 최적의 하이퍼파라미터를 탐색
-- `cv=5`(5-Fold 교차 검증)를 통해 특정 데이터에 과적합되지 않은 일반화된 모델 생성
+---
 
-### 3. 공격수(Forward) 특화 랭킹 시스템
-- 모델이 예측한 확률(`Prospect_Prob`)을 기반으로 핵심 공격수 포지션(`ST`, `LW`, `RW`, `CF`, `LF`, `RF`)을 필터링하여 최종 TOP 10 명단 추출
+## 🤖 3. 모델링 전략 (Modeling Strategy)
+학습 효율성과 예측력 사이의 균형을 맞춘 **Hybrid 앙상블** 및 **교차 검증** 전략을 사용했습니다.
 
-## 📊 모델별 성능 및 특징 비교
+* **CatBoost Regressor**: 텍스트 중심의 범주형 데이터(`brand`, `model` 등) 처리에 최적화.
+* **LightGBM**: 빠른 학습 속도와 수치형 데이터 변동성 포착을 위해 사용.
+* **5-Fold Cross Validation**: 데이터의 모든 구간을 검증하여 과적합(Overfitting) 방지 및 리더보드 점수의 안정성 확보.
 
-| 모델 구분 | 사용 기술/프레임워크 | 주요 특징 | 평가 지표 (AUC) | 비고 |
-| :--- | :--- | :--- | :--- | :--- |
-| **LightAutoML** | **LAMA (LGBM + CB)** | 자동 피처 엔지니어링 및 모델 스태킹 | **0.8X ~ 0.9X** | **최종 채택 전략** |
-| **Manual Ensemble** | **ADA + RF + LGBM** | 모델별 수동 가중치 부여 및 임계값 튜닝 | 0.76 ~ 0.77 (F1) | 높은 제어력 |
-| **AutoGluon** | **Stacking Ensemble** | 다계층 앙상블 자동 최적화 | 0.75 ~ 0.76 (F1) | 성능 대비 제어 어려움 |
 
-## 📈 분석 결과 및 출력물
-- **주요 지표**: 나이(Age), 반응 속도(Reactions), Prospect_Index가 유망주 판단의 핵심 지표로 작용
-- **최종 산출물**: 
-    - `fw_prospect_top10.csv`: 모델이 선정한 차세대 공격수 TOP 10 리스트
-    - `prospect_analysis_full.csv`: 전체 선수의 유망주 확률 분석 결과
+
+---
+
+## 📈 4. 성능 평가 (Evaluation)
+* **Main Metric**: RMSE (Root Mean Squared Error)
+* **Secondary Metric**: $R^2$ Score (결정계수)
+* **성과**: 로그 스케일 기준 $R^2$ 점수 **0.8X** 이상 달성 (검증 데이터셋 기준).
+
+---
+
+## 🚀 5. 실행 방법 (How to Run)
+1. `train.csv`, `test.csv` 파일을 루트 폴더에 배치합니다.
+2. 아래 패키지를 설치합니다:
+   ```bash
+   pip install catboost lightgbm pandas numpy scikit-learn

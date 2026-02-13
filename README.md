@@ -1,102 +1,88 @@
-# 🚀 Little Sonny: Data Science & Machine Learning Project
+# 🚀 Little Sonny: Data Science & ML Project
 
-**"도메인 지식 기반의 정밀 데이터 정제와 최적의 앙상블 모델링을 통한 인사이트 도출"**
+**"데이터 무결성 검증부터 고도화된 앙상블까지: 데이터의 가치를 복원하는 여정"**
 
-본 프로젝트는 2주간 **축구 유망주 예측**, **학생 성적 데이터 검증**, **중고차 시세 예측**이라는 세 가지 데이터셋을 대상으로 데이터 사이언스 파이프라인 전반을 수행했습니다. 단순한 모델링을 넘어 데이터의 논리적 무결성을 검증하고, 현실 세계의 노이즈를 제어하여 모델의 신뢰성을 확보하는 데 집중했습니다.
+---
 
-### 📊 Project Summary at a Glance
+### 📊 Project Overview
 
-| Project | Task | 핵심 기법 | 주요 성과 |
+| 구분 | ⚽ 01. Soccer | 🎓 02. Student | 🚗 03. Used Car |
 | --- | --- | --- | --- |
-| **Soccer** | Classification | **AutoGluon(Stacking/Weighted Ensemble)**, Threshold 최적화 | F1-score 0.70+ 달성 및 유망주 랭킹 도출 |
-| **Student** | Regression | 논리적 모순 역추적, Outlier Clipping | 데이터 무결성 확보 및 학습 패턴 인사이트 발굴 |
-| **Used Car** | Regression | Regex 엔진 정보 파싱, Target Encoding(Median) | R2 Score 초기 모델 대비 성능 205% 향상 |
+| **Task** | 유망주 분류 (Class) | 성적 예측 (Reg) | 시세 예측 (Reg) |
+| **핵심 기법** | **AutoGluon** & Threshold | **Logic-Check** & Clipping | **Regex 파싱** & Encoding |
+| **최종 성과** | **F1-score 0.70+** | **데이터 무결성 확보** | **R2 Score 0.79~0.80** |
 
 ---
 
-## ⚽ Project 1: Soccer Prospect Prediction (Classification)
+## 1️⃣ [Classification] Soccer Prospect Prediction
 
-FIFA 축구 선수 데이터를 분석하여 특정 선수가 향후 대성할 가능성이 있는 **'유망주(Prospect)'**인지 여부를 예측하고 최종 랭킹을 도출하는 프로젝트입니다.
+> **"나이라는 제약 조건을 넘어 최적의 유망주 랭킹을 도출하다"**
 
-### 🔍 탐색적 데이터 분석 (EDA) 및 변수 설계
+### 🔍 Problem & Strategy
 
-* **나이(Age)의 지배적 영향력**: 16~18세 구간에서 유망주 비율이 압도적이며, 나이가 들수록 유망주 선정 비율이 급격히 하락하는 음의 상관관계를 확인.
-* **Scouting Score 설계**: 단순 스탯 나열이 아닌 공격 결정력, 속도, 기술 등을 조합한 자체 지표를 생성하여 모델의 변별력을 높임.
-* **포지션 그룹화(Pos_Group)**: 15개 이상의 세부 포지션을 Forward, Midfielder, Defender, GK로 단순화하여 학습 효율 최적화.
-
-### 🤖 AutoGluon & AutoML 전략
-
-* **AutoML 도입**: 여러 팀원의 협업 과정에서 **AutoGluon**을 활용하여 자동 전처리, 다중 모델 학습, 스태킹(Stacking) 앙상블을 수행.
-* **WeightedEnsemble_L2**: 개별 모델의 장점을 결합한 가중치 앙상블을 통해 Validation F1 0.7273을 기록하며 최상위 성능 도출.
-* **Feature Importance 해석**:
-* **Age (0.322)**: 예측에 가장 결정적인 변수로 작용.
-* **신체 조건**: Stamina(0.0166), Height(0.0135), Agility(0.0083)가 핵심 지표로 분석됨.
+* **Problem**: 나이(Age) 변수의 지배력이 너무 커서 다른 신체 능력치가 무시되는 경향 발생.
+* **Strategy**:
+* **AutoGluon**을 활용한 자동화된 전처리 및 **Stacking/Weighted Ensemble** 구축.
+* 단순 정확도보다 실제 유망주를 놓치지 않기 위한 **Recall 기반 Threshold(0.3434) 최적화**.
 
 
 
-### 🛠 최종 모델링 및 랭킹 도출
+### 📈 핵심 분석 결과
 
-* **가중치 앙상블**: AdaBoost(0.4)를 중심으로 RF(0.3), LGBM(0.3)을 결합하거나 AutoGluon의 스태킹 결과를 활용하여 Soft Voting 수행.
-* **임계값 최적화**: Macro F1 점수를 극대화하기 위해 검증 데이터 기준 **최적 임계값 0.3434**를 적용하여 유망주 Top-N 랭킹 도출.
+* **Feature Importance**: Age(0.322) 외에도 Stamina, Height 등 신체 지표의 영향력 확인.
+* **Final Impact**: 다수 모델의 장점을 결합하여 유망주 판별의 정밀도와 재현율을 동시에 확보.
 
 ---
 
-## 🎓 Project 2: Student Score Prediction (Regression)
+## 2️⃣ [Insight] Student Performance Analysis
 
-Kaggle 데이터를 활용하여 학생들의 학습 습관과 생활 패턴이 **최종 시험 점수(exam_score)**에 미치는 영향을 분석하고 예측 모델을 구축했습니다.
+> **"합성 데이터 속 숨겨진 모순을 찾아 분석의 당위성을 입증하다"**
 
-### 📊 데이터셋 구성 (약 630,000개 레코드)
+### 🔍 Problem & Strategy
 
-* **주요 변수**: `study_hours`, `class_attendance`, `sleep_hours`, `sleep_quality`, `internet_access`, `exam_difficulty` 등.
-
-### 🔍 합성 데이터의 논리적 결함 및 인사이트
-
-* **모순 데이터 발견**: 인터넷 미연결(`Internet: No`) 상태임에도 온라인 강의(`Online Video`)를 수강하는 데이터 8,730건 식별. 합성 데이터 생성 과정의 논리적 오류를 역추적함.
-* **수면의 질 vs 시간**: 단순히 오래 자는 것보다 **수면의 질**이 높은 학생들의 성적이 일관되게 높게 나타남.
-* **천재 그룹 분석**: 공부 시간이 매우 짧음에도(2시간 이하) 고득점인 그룹은 '코칭(Coaching)' 비율이 압도적으로 높음을 확인.
-
-### 🛠 전처리 및 모델링 전략
-
-* **이상치 Clipping**: 20점 이하 및 100점 이상 데이터를 삭제하지 않고 임계값으로 고정하여 합성 데이터의 분포 왜곡 방지.
-* **사용 모델**: RandomForest, GradientBoosting, XGBoost 및 **LightAutoML(LAMA)**을 활용하여 대규모 데이터셋에 최적화된 회귀 성능 확보.
-
----
-
-## 🚗 Project 3: Used Car Price Prediction (Regression)
-
-18만 개의 대규모 중고차 데이터를 분석하여 가격을 예측하는 프로젝트로, 현실 세계의 노이즈를 제어하여 **MAE 22% 감소, R2 205% 향상**을 달성했습니다.
-
-### 🛠 정밀 피처 엔지니어링 (Preprocessing Deep-Dive)
-
-* **Regex 기반 엔진 정보 추출**: 비정형 텍스트인 `engine` 컬럼에서 정규표현식을 사용하여 핵심 수치 파싱.
-* 마력(HP): `(\d+\.?\d*)HP` / 배기량(L): `(\d+\.?\d*)\s*(?:L|Liter)`
+* **Problem**: 약 63만 개의 방대한 합성 데이터에서 발생한 논리적 오류(인터넷X인데 온라인강의O 등) 발견.
+* **Strategy**:
+* **Logic-based Filtering**: 모순 데이터 8,730건을 역추적하여 합성 데이터의 특성 파악.
+* **Clipping**: 극단적인 이상치를 삭제하지 않고 임계값으로 고정하여 데이터 분포의 왜곡 방지.
 
 
-* **Target Encoding (Median)**: brand, model 변수는 이상치 영향을 최소화하기 위해 **중위값(Median)** 기준으로 매핑.
-* **변속기 표준화**: 복잡한 변속기 타입을 Automatic, Manual, CVT, DCT, Other 5개 그룹으로 단순화.
 
-### 🚫 도메인 기반 이상치 제거 (Outlier Removal)
+### 📈 핵심 분석 결과
 
-* **가격 필터링**: $1,000,000 초과 매물 제거 및 일반 브랜드 중 $200,000 초과 매물(기재 오류) 제거.
-* **사기/허위 매물 의심**: 럭셔리 브랜드임에도 $30,000 미만이거나, 연식은 오래되었으나 주행거리가 거의 없는 '좀비 카(Zombie Cars)' 데이터 필터링.
-
-### 📈 모델링 전략 및 성과
-
-* **사용 모델**: **CatBoost**(범주형 데이터 처리), **LightGBM**, **XGBoost** 가중치 블렌딩.
-* **로그 변환**: 타겟 변수(price)에 `np.log1p()` 적용하여 오차 분포 정규화.
-* **성과**: 5-Fold 교차 검증을 통해 로그 스케일 기준 검증 데이터셋 **R2 Score 0.8X 이상** 달성.
+* **인사이트**: 성적에 가장 큰 영향을 미치는 것은 '공부 시간'보다 **'수면의 질'**과 **'전문 코칭'**의 유무임이 밝혀짐.
+* **Final Impact**: 단순 예측을 넘어 교육 환경 개선을 위한 실질적인 행동 지표 제시.
 
 ---
 
-## 🎯 최종 결론 (Conclusion)
+## 3️⃣ [Regression] Used Car Price Prediction
 
-1. **데이터 품질의 중요성**: 모델 튜닝보다 선행되어야 할 것은 도메인 지식에 기반한 정교한 데이터 클리닝과 논리적 무결성 검증임을 확인했습니다.
-2. **합성 데이터의 한계**: AI 시대의 분석가는 통계 수치뿐만 아니라 **현실적인 개연성**을 심판하는 역할을 수행해야 합니다.
-3. **데이터 정제의 재정의**: 정제는 단순 수치 삭제가 아닌 비상식적 값을 걸러내어 데이터의 본질적 가치를 회복하는 과정입니다.
+> **"비정형 노이즈를 정제하여 초기 모델 대비 성능을 205% 향상시키다"**
+
+### 🔍 Problem & Strategy
+
+* **Problem**: 18만 개의 대규모 데이터 내 비정형 텍스트와 허위 매물(이상치)로 인한 낮은 예측 성능.
+* **Strategy**:
+* **Regex 파싱**: `engine` 컬럼에서 마력(HP)과 배기량(L) 등 핵심 수치 변수 직접 추출.
+* **Domain Filtering**: 브랜드 가치와 연식에 맞지 않는 '좀비 카' 및 허위 고가/저가 매물 대거 제거.
+* **Target Encoding**: 브랜드/모델 변수를 중위값(Median)으로 매핑하여 이상치 저항성 확보.
+
+
+
+### 📈 핵심 분석 결과
+
+* **Model**: CatBoost, LightGBM, XGBoost 가중치 블렌딩 적용.
+* **Final Impact**: 초기 R2 점수 0.26에서 **최종 0.79~0.80**으로 **약 205% 성능 향상** 달성.
 
 ---
 
-**Team Little Sonny** | 허수빈(팀장), 진민경, 최서연, 한승우
+## 🎯 최종 결론 (The Core Message)
+
+* **Step 1. 도메인 기반 정제**: 모델 튜닝보다 선행되어야 할 것은 도메인 지식에 기반한 정교한 데이터 클리닝입니다.
+* **Step 2. 데이터 무결성**: 분석가는 통계 수치 너머의 **현실적인 개연성**을 판단하여 데이터의 가치를 복원해야 합니다.
+* **Step 3. 앙상블의 힘**: 단일 모델의 한계를 극복하기 위한 다각도의 앙상블(AutoGluon, Blending)이 최종 성능의 핵심입니다.
 
 ---
 
+**Team Little Sonny** | 허수빈, 진민경, 최서연, 한승우
+
+---

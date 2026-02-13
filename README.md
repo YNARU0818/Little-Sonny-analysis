@@ -1,88 +1,91 @@
-# 🚀 Little Sonny: Data Science & ML Project
+# 🚀 Little Sonny: Data Science & Machine Learning Project
 
-**"데이터 무결성 검증부터 고도화된 앙상블까지: 데이터의 가치를 복원하는 여정"**
+**"도메인 지식 기반의 정밀 데이터 정제와 최적의 앙상블 모델링을 통한 인사이트 도출"**
 
----
+본 프로젝트는 2주간 **축구 유망주 예측**, **학생 성적 데이터 검증**, **중고차 시세 예측**이라는 세 가지 데이터셋을 대상으로 데이터 사이언스 파이프라인 전반을 수행했습니다. 단순한 모델링을 넘어 데이터의 논리적 무결성을 검증하고, 현실 세계의 노이즈를 제어하여 모델의 신뢰성을 확보하는 데 집중했습니다.
 
-### 📊 Project Overview
+### 📊 Project Summary at a Glance
 
-| 구분 | ⚽ 01. Soccer | 🎓 02. Student | 🚗 03. Used Car |
+| Project | Task | 핵심 기법 | 주요 성과 |
 | --- | --- | --- | --- |
-| **Task** | 유망주 분류 (Class) | 성적 예측 (Reg) | 시세 예측 (Reg) |
-| **핵심 기법** | **AutoGluon** & Threshold | **Logic-Check** & Clipping | **Regex 파싱** & Encoding |
-| **최종 성과** | **F1-score 0.70+** | **데이터 무결성 확보** | **R2 Score 0.79~0.80** |
+| **Soccer** | Classification | **AutoGluon(Stacking)**, Threshold 최적화 | F1-score 0.70+ 달성 및 유망주 랭킹 도출 |
+| **Student** | Regression | 논리적 모순 역추적, Outlier Clipping | 데이터 무결성 확보 및 학습 패턴 인사이트 발굴 |
+| **Used Car** | Regression | Regex 엔진 정보 파싱, Target Encoding | **R2 Score 초기 대비 205% 향상** |
 
 ---
 
-## 1️⃣ [Classification] Soccer Prospect Prediction
+## ⚽ Project 1: Soccer Prospect Prediction (Classification)
 
-> **"나이라는 제약 조건을 넘어 최적의 유망주 랭킹을 도출하다"**
+FIFA 축구 선수 데이터를 분석하여 특정 선수가 향후 대성할 가능성이 있는 **'유망주(Prospect)'**인지 여부를 예측하고 최종 랭킹을 도출하는 프로젝트입니다.
 
-### 🔍 Problem & Strategy
+### 🔍 탐색적 데이터 분석 (EDA) 및 변수 설계
 
-* **Problem**: 나이(Age) 변수의 지배력이 너무 커서 다른 신체 능력치가 무시되는 경향 발생.
-* **Strategy**:
-* **AutoGluon**을 활용한 자동화된 전처리 및 **Stacking/Weighted Ensemble** 구축.
-* 단순 정확도보다 실제 유망주를 놓치지 않기 위한 **Recall 기반 Threshold(0.3434) 최적화**.
+* **나이(Age)의 지배적 영향력**: 16~18세 구간에서 유망주 비율이 압도적이며, 나이가 들수록 유망주 선정 비율이 급격히 하락하는 음의 상관관계를 확인했습니다.
+* **Scouting Score 설계**: 단순 스탯 나열이 아닌 공격 결정력, 속도, 기술 등을 조합한 자체 지표를 생성하여 모델의 변별력을 높였습니다.
+* **포지션 그룹화(Pos_Group)**: 15개 이상의 세부 포지션을 Forward, Midfielder, Defender, GK로 단순화하여 학습 효율을 최적화했습니다.
 
+### 🤖 AutoGluon & AutoML 전략
 
+* **AutoML 도입**: 여러 팀원의 협업 과정에서 **AutoGluon**을 활용하여 자동 전처리, 다중 모델 학습, 스태킹(Stacking) 앙상블을 수행했습니다.
+* **WeightedEnsemble_L2**: 개별 모델의 장점을 결합한 가중치 앙상블을 통해 Validation F1 0.7273을 기록하며 최상위 성능을 도출했습니다.
+* **Feature Importance 해석**: **Age (0.322)**가 예측에 가장 결정적인 변수로 작용했으며, Stamina(0.0166), Height(0.0135)가 뒤를 이었습니다.
 
-### 📈 핵심 분석 결과
+### 🛠 최종 모델링 및 랭킹 도출
 
-* **Feature Importance**: Age(0.322) 외에도 Stamina, Height 등 신체 지표의 영향력 확인.
-* **Final Impact**: 다수 모델의 장점을 결합하여 유망주 판별의 정밀도와 재현율을 동시에 확보.
-
----
-
-## 2️⃣ [Insight] Student Performance Analysis
-
-> **"합성 데이터 속 숨겨진 모순을 찾아 분석의 당위성을 입증하다"**
-
-### 🔍 Problem & Strategy
-
-* **Problem**: 약 63만 개의 방대한 합성 데이터에서 발생한 논리적 오류(인터넷X인데 온라인강의O 등) 발견.
-* **Strategy**:
-* **Logic-based Filtering**: 모순 데이터 8,730건을 역추적하여 합성 데이터의 특성 파악.
-* **Clipping**: 극단적인 이상치를 삭제하지 않고 임계값으로 고정하여 데이터 분포의 왜곡 방지.
-
-
-
-### 📈 핵심 분석 결과
-
-* **인사이트**: 성적에 가장 큰 영향을 미치는 것은 '공부 시간'보다 **'수면의 질'**과 **'전문 코칭'**의 유무임이 밝혀짐.
-* **Final Impact**: 단순 예측을 넘어 교육 환경 개선을 위한 실질적인 행동 지표 제시.
+* **가중치 앙상블**: AdaBoost(0.4)를 중심으로 RF(0.3), LGBM(0.3)을 결합하거나 AutoGluon의 스태킹 결과를 활용하여 Soft Voting을 수행했습니다.
+* **임계값 최적화**: Macro F1 점수를 극대화하기 위해 검증 데이터 기준 **최적 임계값 0.3434**를 적용하여 유망주 Top-N 랭킹을 도출했습니다.
 
 ---
 
-## 3️⃣ [Regression] Used Car Price Prediction
+## 🎓 Project 2: Student Score Prediction (Regression)
 
-> **"비정형 노이즈를 정제하여 초기 모델 대비 성능을 205% 향상시키다"**
+Kaggle 데이터를 활용하여 학생들의 학습 습관과 생활 패턴이 **최종 시험 점수(exam_score)**에 미치는 영향을 분석하고 예측 모델을 구축했습니다.
 
-### 🔍 Problem & Strategy
+### 📊 데이터셋 구성 및 탐색
 
-* **Problem**: 18만 개의 대규모 데이터 내 비정형 텍스트와 허위 매물(이상치)로 인한 낮은 예측 성능.
-* **Strategy**:
-* **Regex 파싱**: `engine` 컬럼에서 마력(HP)과 배기량(L) 등 핵심 수치 변수 직접 추출.
-* **Domain Filtering**: 브랜드 가치와 연식에 맞지 않는 '좀비 카' 및 허위 고가/저가 매물 대거 제거.
-* **Target Encoding**: 브랜드/모델 변수를 중위값(Median)으로 매핑하여 이상치 저항성 확보.
+* **주요 변수**: `study_hours`, `class_attendance`, `sleep_quality`, `internet_access`, `exam_difficulty` 등 약 630,000개의 레코드를 분석했습니다.
+* **논리적 결함 발견**: 인터넷 미연결(`Internet: No`) 상태임에도 온라인 강의를 수강하는 데이터 8,730건을 식별하여 합성 데이터의 논리적 공백을 역추적했습니다.
+* **핵심 인사이트**: 절대적 수면 시간보다 **수면의 질**이 성적과 더 높은 상관관계를 보였으며, 공부 시간이 짧아도 고득점인 그룹은 **코칭(Coaching)** 비율이 압도적으로 높았습니다.
 
+### 🛠 전처리 및 모델링 전략
 
-
-### 📈 핵심 분석 결과
-
-* **Model**: CatBoost, LightGBM, XGBoost 가중치 블렌딩 적용.
-* **Final Impact**: 초기 R2 점수 0.26에서 **최종 0.79~0.80**으로 **약 205% 성능 향상** 달성.
+* **이상치 Clipping**: 20점 이하 및 100점 이상 데이터를 삭제하지 않고 임계값으로 고정하여 정보 손실을 방지했습니다.
+* **사용 모델**: RandomForest, GradientBoosting 및 **LightAutoML(LAMA)**을 활용하여 대규모 데이터셋에 최적화된 회귀 성능을 확보했습니다.
 
 ---
 
-## 🎯 최종 결론 (The Core Message)
+## 🚗 Project 3: Used Car Price Prediction (Regression)
 
-* **Step 1. 도메인 기반 정제**: 모델 튜닝보다 선행되어야 할 것은 도메인 지식에 기반한 정교한 데이터 클리닝입니다.
-* **Step 2. 데이터 무결성**: 분석가는 통계 수치 너머의 **현실적인 개연성**을 판단하여 데이터의 가치를 복원해야 합니다.
-* **Step 3. 앙상블의 힘**: 단일 모델의 한계를 극복하기 위한 다각도의 앙상블(AutoGluon, Blending)이 최종 성능의 핵심입니다.
+18만 개의 대규모 중고차 데이터를 분석하여 가격을 예측하는 프로젝트로, 현실의 노이즈를 정제하여 **초기 모델 대비 성능을 205% 향상**시켰습니다.
+
+### 🛠 정밀 피처 엔지니어링 (Preprocessing)
+
+* **Regex 기반 엔진 정보 추출**: 비정형 텍스트인 `engine` 컬럼에서 정규표현식을 사용하여 마력(HP), 배기량(L), 실린더 정보를 수치화했습니다.
+* **Target Encoding (Median)**: brand, model 변수는 이상치 영향을 최소화하기 위해 **중위값(Median)** 기준으로 매핑했습니다.
+* **변속기 표준화**: 다양한 변속기 타입을 Automatic, Manual, CVT, DCT, Other 5개 그룹으로 단순화했습니다.
+
+### 🚫 도메인 기반 이상치 제거 (Outlier Removal)
+
+* **비현실적 데이터 필터링**: $1,000,000 초과 매물 및 일반 브랜드 중 $200,000 초과 매물(기재 오류)을 제거했습니다.
+* **사기/허위 매물 의심**: 럭셔리 브랜드임에도 $30,000 미만이거나, 연식 대비 주행거리가 거의 없는 '좀비 카(Zombie Cars)' 데이터를 필터링했습니다.
+
+### 📈 모델링 전략 및 성과
+
+* **사용 모델**: **CatBoost**(범주형 데이터 처리), **LightGBM**, **XGBoost** 가중치 블렌딩을 적용했습니다.
+* **로그 변환**: 타겟 변수(price)에 `np.log1p()` 적용하여 오차 분포를 정규화했습니다.
+* **성과**: 5-Fold 교차 검증을 통해 **R2 Score 약 0.79~0.80**을 달성하며 초기 모델(R2 0.26) 대비 비약적인 성능 향상을 보였습니다.
 
 ---
 
-**Team Little Sonny** | 허수빈, 진민경, 최서연, 한승우
+## 🎯 최종 결론 (Conclusion)
+
+1. **데이터 품질의 중요성**: 단순 모델 튜닝보다 도메인 지식에 기반한 정교한 데이터 클리닝과 논리적 무결성 검증이 모델 성능을 결정짓는 핵심 요인임을 확인했습니다.
+2. **합성 데이터의 한계**: AI 시대의 분석가는 통계 수치뿐만 아니라 **현실적인 개연성**을 심판하는 역할을 수행해야 함을 학습했습니다.
 
 ---
+
+**Team Little Sonny** | 허수빈(팀장), 진민경, 최서연, 한승우
+
+---
+
+**이렇게 수정하니 훨씬 객관적이고 신뢰감이 가는 리드미가 되었습니다. 수치 부분에서 더 보충하거나 수정하고 싶은 내용이 있으신가요?**
